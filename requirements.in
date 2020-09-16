@@ -1,0 +1,27 @@
+pip-tools
+wget
+gdown
+
+numpy
+pandas
+torch
+torchvision
+transformers>=3.1
+pytorch-lightning
+omegaconf>=2
+yapf
+watermark
+
+d6tflow
+luigi
+pylint
+# hydra-core
+skorch
+
+matplotlib
+seaborn
+traitlets==4.3.3
+numexpr
+pylatexenc
+
+nlp
