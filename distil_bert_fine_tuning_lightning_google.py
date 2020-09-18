@@ -23,21 +23,17 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 
 # End : Import the packages
-
-i = 1
 # %%
-# Remark: pl.LightningModule is derived from torch.nn.Module It has additional methods
-# that are part of the lightning interface and that need to be defined by the user. Having
-# these additional methods is very useful for several reasons:
-# 1. Reasonable Expectations: Once you know the pytorch-lightning-system you more easily
-#    read other people's code, because it is always structured in the same way
-# 2. Less Boilerplate: The additional class methods make pl.LightningModule more powerful
-#    than the nn.Module from plain pytorch. This means you have to write less of the
-#    repetitive boilerplate code
-# 3. Perfact for the development lifecycle Pytorch Lightning makes it very easy to switch
-#    from cpu to gpu/tpu. Further it supplies method to quickly run your code on a
-#    fraction of the data, which is very useful in the development process, especially for
-#    debugging
+# Remark: pl.LightningModule is derived from torch.nn.Module It has additional methods that are part of the
+# lightning interface and that need to be defined by the user. Having these additional methods is very useful
+# for several reasons:
+# 1. Reasonable Expectations: Once you know the pytorch-lightning-system you more easily read other people's
+#    code, because it is always structured in the same way
+# 2. Less Boilerplate: The additional class methods make pl.LightningModule more powerful than the nn.Module
+#    from plain pytorch. This means you have to write less of the repetitive boilerplate code
+# 3. Perfact for the development lifecycle Pytorch Lightning makes it very easy to switch from cpu to gpu/tpu.
+#    Further it supplies method to quickly run your code on a fraction of the data, which is very useful in
+#    the development process, especially for debugging
 
 
 class Model(pl.LightningModule):
@@ -45,9 +41,9 @@ class Model(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters()
-        # a very useful feature of pytorch lightning  which leads to the named variables
-        # that are passed in being available as self.hparams.<variable_name> We use this
-        # when refering to eg self.hparams.learning_rate
+        # a very useful feature of pytorch lightning  which leads to the named variables that are passed in
+        # being available as self.hparams.<variable_name> We use this when refering to eg
+        # self.hparams.learning_rate
 
         # freeze
         self._frozen = False
@@ -65,35 +61,35 @@ class Model(pl.LightningModule):
 
         print('Model Type', type(self.model))
 
-        # We use the pretrained "bert-base-uncased" Alternatively we can use e.g.
+        # Possible choices for pretrained are:
         # distilbert-base-uncased
+        # bert-base-uncased
 
-        # The BERT paper says: "[The] pre-trained BERT model can be fine-tuned with just
-        # one additional output layer to create state-of-the-art models for a wide range
-        # of tasks, such as question answering and language inference, without substantial
-        # task-specific architecture modifications."
+        # The BERT paper says: "[The] pre-trained BERT model can be fine-tuned with just one additional output
+        # layer to create state-of-the-art models for a wide range of tasks, such as question answering and
+        # language inference, without substantial task-specific architecture modifications."
         #
-        # Huggingface/transformers provides access to such pretrained model versions, some
-        # of which have been published by various community members.
+        # Huggingface/transformers provides access to such pretrained model versions, some of which have been
+        # published by various community members.
         #
-        # BertForSequenceClassification is one of those pretrained models, which is loaded
-        # automatically by AutoModelForSequenceClassification because it corresponds to
-        # the pretrained weights of "bert-base-uncased".
+        # BertForSequenceClassification is one of those pretrained models, which is loaded automatically by
+        # AutoModelForSequenceClassification because it corresponds to the pretrained weights of
+        # "bert-base-uncased".
         #
-        # Huggingface says about BertForSequenceClassification: Bert Model transformer
-        # with a sequence classification/regression head on top (a linear layer on top of
-        # the pooled output) e.g. for GLUE tasks."
+        # Huggingface says about BertForSequenceClassification: Bert Model transformer with a sequence
+        # classification/regression head on top (a linear layer on top of the pooled output) e.g. for GLUE
+        # tasks."
 
         # This part is easy  we instantiate the pretrained model (checkpoint)
 
-        # But it's also incredibly important, e.g. by using "bert-base-uncased, we
-        # determine, that that model does not distinguish between lower and upper case.
-        # This might have a significant impact on model performance!!!
+        # But it's also incredibly important, e.g. by using "bert-base-uncased, we determine, that that model
+        # does not distinguish between lower and upper case. This might have a significant impact on model
+        # performance!!!
 
     def forward(self, batch):
-        # there are some choices, as to how you can define the input to the forward
-        # function I prefer it this way, where the batch contains the input_ids, the
-        # input_put_mask and sometimes the labels (for training)
+        # there are some choices, as to how you can define the input to the forward function I prefer it this
+        # way, where the batch contains the input_ids, the input_put_mask and sometimes the labels (for
+        # training)
 
         b_input_ids = batch[0]
         b_input_mask = batch[1]
@@ -102,18 +98,16 @@ class Model(pl.LightningModule):
 
         b_labels = batch[2] if has_labels else None
 
-        # there are labels in the batch, this indicates: training for the
-        # BertForSequenceClassification model: it means that the model returns tuple,
-        # where the first element is the training loss and the second element is the
-        # logits
+        # there are labels in the batch, this indicates: training for the BertForSequenceClassification model:
+        # it means that the model returns tuple, where the first element is the training loss and the second
+        # element is the logits
         if has_labels:
             loss, logits = self.model(b_input_ids,
                                       attention_mask=b_input_mask,
                                       labels=b_labels)
 
-        # there are labels in the batch, this indicates: prediction for the
-        # BertForSequenceClassification model: it means that the model returns simply the
-        # logits
+        # there are labels in the batch, this indicates: prediction for the BertForSequenceClassification
+        # model: it means that the model returns simply the logits
 
         if not has_labels:
             loss, logits = None, self.model(b_input_ids,
@@ -123,46 +117,41 @@ class Model(pl.LightningModule):
         return loss, logits
 
     def training_step(self, batch, batch_nb):
-        # the training step is a (virtual) method,specified in the interface, that the
-        # pl.LightningModule class stipulates you to overwrite. This we do here, by virtue
-        # of this definition
+        # the training step is a (virtual) method,specified in the interface, that the pl.LightningModule
+        # class stipulates you to overwrite. This we do here, by virtue of this definition
 
         loss, logits = self(
             batch
         )  # self refers to the model, which in turn acceses the forward method
 
         tensorboard_logs = {'train_loss': loss}
-        # pytorch lightning allows you to use various logging facilities, eg tensorboard
-        # with tensorboard we can track and easily visualise the progress of training. In
-        # this case
+        # pytorch lightning allows you to use various logging facilities, eg tensorboard with tensorboard we
+        # can track and easily visualise the progress of training. In this case
 
         return {'loss': loss, 'log': tensorboard_logs}
-        # the training_step method expects a dictionary, which should at least contain the
-        # loss
+        # the training_step method expects a dictionary, which should at least contain the loss
 
     def validation_step(self, batch, batch_nb):
-        # the training step is a (virtual) method,specified in the interface, that the
-        # pl.LightningModule class  wants you to overwrite, in case you want to do
-        # validation. This we do here, by virtue of this definition.
+        # the training step is a (virtual) method,specified in the interface, that the pl.LightningModule
+        # class  wants you to overwrite, in case you want to do validation. This we do here, by virtue of this
+        # definition.
 
         loss, logits = self(batch)
         # self refers to the model, which in turn accesses the forward method
 
-        # Apart from the validation loss, we also want to track validation accuracy  to
-        # get an idea, what the model training has achieved "in real terms".
+        # Apart from the validation loss, we also want to track validation accuracy  to get an idea, what the
+        # model training has achieved "in real terms".
 
         labels = batch[2]
         predictions = torch.argmax(logits, dim=1)
         accuracy = (labels == predictions).float().mean()
 
         return {'val_loss': loss, 'accuracy': accuracy}
-        # the validation_step method expects a dictionary, which should at least contain
-        # the val_loss
+        # the validation_step method expects a dictionary, which should at least contain the val_loss
 
     def validation_epoch_end(self, validation_step_outputs):
-        # OPTIONAL The second parameter in the validation_epoch_end - we named it
-        # validation_step_outputs - contains the outputs of the validation_step, collected
-        # for all the batches over the entire epoch.
+        # OPTIONAL The second parameter in the validation_epoch_end - we named it validation_step_outputs -
+        # contains the outputs of the validation_step, collected for all the batches over the entire epoch.
 
         # We use it to track progress of the entire epoch, by calculating averages
 
@@ -181,18 +170,17 @@ class Model(pl.LightningModule):
                 'avg_accuracy': avg_accuracy
             }
         }
-        # The training_step method expects a dictionary, which should at least contain the
-        # val_loss. We also use it to include the log - with the tensorboard logs. Further
-        # we define some values that are displayed in the tqdm-based progress bar.
+        # The training_step method expects a dictionary, which should at least contain the val_loss. We also
+        # use it to include the log - with the tensorboard logs. Further we define some values that are
+        # displayed in the tqdm-based progress bar.
 
     def configure_optimizers(self):
-        # The configure_optimizers is a (virtual) method, specified in the interface, that
-        # the pl.LightningModule class wants you to overwrite.
+        # The configure_optimizers is a (virtual) method, specified in the interface, that the
+        # pl.LightningModule class wants you to overwrite.
 
-        # In this case we define that some parameters are optimized in a different way
-        # than others. In particular we single out parameters that have 'bias',
-        # 'LayerNorm.weight' in their names. For those we do not use an optimization
-        # technique called weight decay.
+        # In this case we define that some parameters are optimized in a different way than others. In
+        # particular we single out parameters that have 'bias', 'LayerNorm.weight' in their names. For those
+        # we do not use an optimization technique called weight decay.
 
         no_decay = ['bias', 'LayerNorm.weight']
 
@@ -253,20 +241,17 @@ class Model(pl.LightningModule):
 
 
 class Data(pl.LightningDataModule):
-    # So here we finally arrive at the definition of our data class derived from
-    # pl.LightningDataModule.
+    # So here we finally arrive at the definition of our data class derived from pl.LightningDataModule.
     #
-    # In earlier versions of pytorch lightning  (prior to 0.9) the methods here were part
-    # of the model class derived from pl.LightningModule. For better flexibility and
-    # readability the Data and Model related parts were split out into two different
-    # classes:
+    # In earlier versions of pytorch lightning  (prior to 0.9) the methods here were part of the model class
+    # derived from pl.LightningModule. For better flexibility and readability the Data and Model related parts
+    # were split out into two different classes:
     #
     # pl.LightningDataModule and pl.LightningModule
     #
     # with the Model related part remaining in pl.LightningModule
     #
-    # This is explained in more detail in this video:
-    # https://www.youtube.com/watch?v=L---MBeSXFw
+    # This is explained in more detail in this video: https://www.youtube.com/watch?v=L---MBeSXFw
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -274,8 +259,7 @@ class Data(pl.LightningDataModule):
         # self.save_hyperparameters()
         if isinstance(args, tuple): args = args[0]
         self.hparams = args
-        # cf this open issue:
-        # https://github.com/PyTorchLightning/pytorch-lightning/issues/3232
+        # cf this open issue: https://github.com/PyTorchLightning/pytorch-lightning/issues/3232
 
         print('args:', args)
         print('kwargs:', kwargs)
@@ -292,20 +276,19 @@ class Data(pl.LightningDataModule):
 
         # This part is easy  we instantiate the tokenizer
 
-        # So this is easy, but it's also incredibly important, e.g. in this by using
-        # "bert-base-uncased", we determine, that before any text is analysed its all
-        # turned into lower case. This might have a significant impact on model
-        # performance!!!
+        # So this is easy, but it's also incredibly important, e.g. in this by using "bert-base-uncased", we
+        # determine, that before any text is analysed its all turned into lower case. This might have a
+        # significant impact on model performance!!!
         #
-        # BertTokenizer is the tokenizer, which is loaded automatically by AutoTokenizer
-        # because it was used to train the model weights of "bert-base-uncased".
+        # BertTokenizer is the tokenizer, which is loaded automatically by AutoTokenizer because it was used
+        # to train the model weights of "bert-base-uncased".
 
     def prepare_data(self):
-        # Even if you have a complicated setup, where you train on a cluster of multiple
-        # GPUs, prepare_data is only run once on the cluster.
+        # Even if you have a complicated setup, where you train on a cluster of multiple GPUs, prepare_data is
+        # only run once on the cluster.
 
-        # Typically - as done here - prepare_data just performs the time-consuming step of
-        # downloading the data.
+        # Typically - as done here - prepare_data just performs the time-consuming step of downloading the
+        # data.
 
         print('Setting up dataset')
 
@@ -328,8 +311,8 @@ class Data(pl.LightningDataModule):
                            quiet=False)
 
     def setup(self, stage=None):
-        # Even if you have a complicated setup, where you train on a cluster of multiple
-        # GPUs, setup is run once on every gpu of the cluster.
+        # Even if you have a complicated setup, where you train on a cluster of multiple GPUs, setup is run
+        # once on every gpu of the cluster.
 
         # typically - as done here - setup
         # - reads the previously downloaded data
@@ -367,8 +350,8 @@ class Data(pl.LightningDataModule):
 
         labels = torch.tensor(labels)
 
-        # Print sentence 0, now as a list of IDs. print('Example') print('Original: ',
-        # sentences[0]) print('Token IDs', input_ids[0]) print('End: Example')
+        # Print sentence 0, now as a list of IDs. print('Example') print('Original: ', sentences[0])
+        # print('Token IDs', input_ids[0]) print('End: Example')
 
         # Combine the training inputs into a TensorDataset.
         dataset = TensorDataset(input_ids, attention_mask, labels)
@@ -387,9 +370,8 @@ class Data(pl.LightningDataModule):
             generator=torch.Generator().manual_seed(42))
 
     def train_dataloader(self):
-        # as explained above, train_dataloader was previously part of the model class
-        # derived from pl.LightningModule train_dataloader needs to return the a
-        # Dataloader with the train_dataset
+        # as explained above, train_dataloader was previously part of the model class derived from
+        # pl.LightningModule train_dataloader needs to return the a Dataloader with the train_dataset
 
         return DataLoader(
             self.train_dataset,  # The training samples.
@@ -399,9 +381,8 @@ class Data(pl.LightningDataModule):
         )
 
     def val_dataloader(self):
-        # as explained above, train_dataloader was previously part of the model class
-        # derived from pl.LightningModule train_dataloader needs to return the a
-        # Dataloader with the val_dataset
+        # as explained above, train_dataloader was previously part of the model class derived from
+        # pl.LightningModule train_dataloader needs to return the a Dataloader with the val_dataset
 
         return DataLoader(
             self.val_dataset,  # The training samples.
@@ -419,25 +400,23 @@ if __name__ == "__main__":
 
     # - you can manually add your own specific arguments.
 
-    # - there is a little more code than seems necessary, because of a particular argument
-    #   the scheduler needs. There is currently an open issue on this complication
+    # - there is a little more code than seems necessary, because of a particular argument the scheduler
+    #   needs. There is currently an open issue on this complication
     #   https://github.com/PyTorchLightning/pytorch-lightning/issues/1038
 
     import argparse
     from argparse import ArgumentParser
     parser = ArgumentParser()
 
-    # We use the parts of very convenient Auto functions from huggingface. This way we can
-    # easily switch between models and tokenizers, just by giving a different name of the
-    # pretrained model.
+    # We use the parts of very convenient Auto functions from huggingface. This way we can easily switch
+    # between models and tokenizers, just by giving a different name of the pretrained model.
     #
-    # BertForSequenceClassification is one of those pretrained models, which is loaded
-    # automatically by AutoModelForSequenceClassification because it corresponds to the
-    # pretrained weights of "bert-base-uncased".
-
-    # Similarly BertTokenizer is one of those tokenizers, which is loaded automatically by
-    # AutoTokenizer because it is the necessary tokenizer for the pretrained weights of
+    # BertForSequenceClassification is one of those pretrained models, which is loaded automatically by
+    # AutoModelForSequenceClassification because it corresponds to the pretrained weights of
     # "bert-base-uncased".
+
+    # Similarly BertTokenizer is one of those tokenizers, which is loaded automatically by AutoTokenizer
+    # because it is the necessary tokenizer for the pretrained weights of "bert-base-uncased".
     parser.add_argument('--pretrained', type=str, default="bert-base-uncased")
     parser.add_argument('--nr_frozen_epochs', type=int, default=5)
     parser.add_argument('--training_portion', type=float, default=0.9)
@@ -445,14 +424,13 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type=float, default=2e-5)
     parser.add_argument('--frac', type=float, default=1)
 
-    # parser = Model.add_model_specific_args(parser) parser =
-    # Data.add_model_specific_args(parser)
+    # parser = Model.add_model_specific_args(parser) parser = Data.add_model_specific_args(parser)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
     # TODO start: remove this later args.limit_train_batches = 10 # TODO remove this later
-    # args.limit_val_batches = 5 # TODO remove this later args.frac = 0.01 # TODO remove
-    # this later TODO end: remove this later
+    # args.limit_val_batches = 5 # TODO remove this later args.frac = 0.01 # TODO remove this later TODO end:
+    # remove this later
 
     # start : get training steps
     d = Data(args)
