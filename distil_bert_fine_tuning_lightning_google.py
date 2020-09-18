@@ -428,9 +428,11 @@ if __name__ == "__main__":
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
 
-    # TODO start: remove this later args.limit_train_batches = 10 # TODO remove this later
-    # args.limit_val_batches = 5 # TODO remove this later args.frac = 0.01 # TODO remove this later TODO end:
-    # remove this later
+    # TODO start: remove this later
+    # args.limit_train_batches = 10 # TODO remove this later
+    # args.limit_val_batches = 5 # TODO remove this later
+    # args.frac = 0.01 # TODO remove this later
+    # TODO end: remove this later
 
     # start : get training steps
     d = Data(args)
